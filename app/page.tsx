@@ -1,65 +1,144 @@
-import Image from "next/image";
+'use client'
+
+import { useEffect, useState } from 'react'
+
+interface ApiResponse {
+  message: string
+}
 
 export default function Home() {
+  const [data, setData] = useState<ApiResponse | null>(null)
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
+
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const res = await fetch('/api/hello')
+        if (!res.ok) throw new Error('Failed to fetch')
+        const json = (await res.json()) as ApiResponse
+        setData(json)
+      } catch (err) {
+        setError(err instanceof Error ? err.message : 'Error')
+      } finally {
+        setLoading(false)
+      }
+    }
+
+    fetchData()
+  }, [])
+
   return (
-    <div className="flex min-h-screen items-center justify-center bg-zinc-50 font-sans dark:bg-black">
-      <main className="flex min-h-screen w-full max-w-3xl flex-col items-center justify-between py-32 px-16 bg-white dark:bg-black sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
-        />
-        <div className="flex flex-col items-center gap-6 text-center sm:items-start sm:text-left">
-          <h1 className="max-w-xs text-3xl font-semibold leading-10 tracking-tight text-black dark:text-zinc-50">
-            To get started, edit the page.tsx file.
-          </h1>
-          <p className="max-w-md text-lg leading-8 text-zinc-600 dark:text-zinc-400">
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Learning
-            </a>{" "}
-            center.
+    <main className="bg-background text-foreground flex min-h-screen items-center justify-center p-4">
+      <div className="w-full max-w-2xl">
+        {/* Title */}
+        <div className="animate-fade-in mb-12 text-center">
+          <h1 className="mb-2 text-4xl font-bold">Next.js + FastAPI</h1>
+          <p className="text-secondary">Powered by Bun</p>
+        </div>
+
+        {/* Main Card */}
+        <div className="animate-slide-up duration-500">
+          <div
+            className="bg-card text-card-foreground animate-slide-up border-border mb-8 rounded-[var(--radius)] border p-8 shadow-lg"
+            style={{ borderRadius: 'var(--radius)' }}
+          >
+            {/* Loading State */}
+            {loading && (
+              <div className="flex flex-col items-center justify-center py-12">
+                <div className="relative mb-4 h-16 w-16">
+                  <div className="border-muted absolute inset-0 animate-spin rounded-full border-4" />
+                  <div className="border-t-primary absolute inset-0 animate-spin rounded-full border-4 border-transparent" />
+                </div>
+                <p className="text-muted-foreground animate-pulse-soft">
+                  Loading...
+                </p>
+              </div>
+            )}
+
+            {/* Error State */}
+            {error && !loading && (
+              <div
+                className="bg-destructive/10 border-destructive animate-bounce-in rounded-[var(--radius)] border-2 p-6"
+                style={{ borderRadius: 'var(--radius)' }}
+              >
+                <p className="text-destructive mb-2 font-semibold">⚠️ Error</p>
+                <p className="text-destructive/80">{error}</p>
+              </div>
+            )}
+
+            {/* Success State */}
+            {data && !loading && !error && (
+              <div className="animate-bounce-in space-y-6">
+                <div className="text-center">
+                  <div
+                    className="bg-primary text-primary-foreground animate-pulse-glow inline-block rounded-full px-6 py-3 font-semibold"
+                    style={{
+                      borderRadius: '9999px',
+                      animationTimingFunction: 'var(--ease-smooth)',
+                    }}
+                  >
+                    ✓ Connected
+                  </div>
+                </div>
+                <p className="text-center text-2xl font-bold">{data.message}</p>
+                <div className="flex justify-center gap-2 text-sm">
+                  <span
+                    className="bg-accent/10 text-accent animate-slide-right rounded-full px-3 py-1 delay-100 duration-300"
+                    style={{ borderRadius: 'var(--radius)' }}
+                  >
+                    Frontend ✓
+                  </span>
+                  <span
+                    className="bg-accent/10 text-accent animate-slide-left rounded-full px-3 py-1 delay-200 duration-300"
+                    style={{ borderRadius: 'var(--radius)' }}
+                  >
+                    Backend ✓
+                  </span>
+                </div>
+              </div>
+            )}
+          </div>
+        </div>
+
+        {/* Info Cards */}
+        <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
+          {/* Next.js Card */}
+          <div
+            className="bg-card text-card-foreground border-border animate-slide-up animate-delay-200 rounded-[var(--radius)] border p-6 shadow-lg transition-shadow hover:shadow-xl"
+            style={{ borderRadius: 'var(--radius)' }}
+          >
+            <h3 className="mb-2 text-lg font-bold">Next.js</h3>
+            <p className="text-muted-foreground text-sm">
+              Frontend served on port 3000
+            </p>
+            <p className="text-primary mt-4 font-mono text-xs">
+              localhost:3000
+            </p>
+          </div>
+
+          {/* FastAPI Card */}
+          <div
+            className="bg-card text-card-foreground border-border animate-slide-up animate-delay-300 rounded-[var(--radius)] border p-6 shadow-lg transition-shadow hover:shadow-xl"
+            style={{ borderRadius: 'var(--radius)' }}
+          >
+            <h3 className="mb-2 text-lg font-bold">FastAPI</h3>
+            <p className="text-muted-foreground text-sm">
+              Backend served on port 5328
+            </p>
+            <p className="text-primary mt-4 font-mono text-xs">
+              localhost:5328
+            </p>
+          </div>
+        </div>
+
+        {/* Footer */}
+        <div className="animate-fade-in animate-delay-300 mt-12 text-center">
+          <p className="text-muted-foreground text-sm">
+            Developed with ⚡ using Next.js, FastAPI & Bun
           </p>
         </div>
-        <div className="flex flex-col gap-4 text-base font-medium sm:flex-row">
-          <a
-            className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-foreground px-5 text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc] md:w-[158px]"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={16}
-            />
-            Deploy Now
-          </a>
-          <a
-            className="flex h-12 w-full items-center justify-center rounded-full border border-solid border-black/[.08] px-5 transition-colors hover:border-transparent hover:bg-black/[.04] dark:border-white/[.145] dark:hover:bg-[#1a1a1a] md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Documentation
-          </a>
-        </div>
-      </main>
-    </div>
-  );
+      </div>
+    </main>
+  )
 }
